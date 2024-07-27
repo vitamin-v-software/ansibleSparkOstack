@@ -23,7 +23,7 @@ essential_packages:
   - libbz2-dev
   - libffi-dev
   - libgdbm-dev
-  - libgpgme11-dev 
+  - libgpgme11-dev
   - libnss3-dev
   - libreadline-dev
   - libseccomp-dev
@@ -45,6 +45,7 @@ essential_packages:
   - vim
   - wget
   - zlib1g-dev
+  - git
 
 
 dhcp_server_nic: end1
