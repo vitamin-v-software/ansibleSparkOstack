@@ -32,7 +32,6 @@
     - { option: "notify_nova_on_port_data_changes", value: "true" }
     - { option: "interface_driver", value: "openvswitch" }
     - { option: "dhcp_agents_per_network", value: "1" }
-    
 
 #
 ### NOVA CONFIG NEUTRON
@@ -113,27 +112,27 @@
   environment: '{{ keystone_admin_env }}'
   become: true
   shell: ovs-vsctl br-exists {{ PROVIDER_BRIDGE_NAME }}
-  register: neutron_br_existis
+  register: neutron_br_exists
   ignore_errors: true
- 
+
 - name: Creating bridge Interface
   environment: '{{ keystone_admin_env }}'
   become: true
   shell: ovs-vsctl add-br {{ PROVIDER_BRIDGE_NAME }}
-  when: neutron_br_existis is failed
+  when: neutron_br_exists is failed
 
-- name: Checking if bridge Exists
+- name: Checking if bridge containing port (end1) on std output Exists
   environment: '{{ keystone_admin_env }}'
   become: true
   shell: ovs-vsctl port-to-br end1
-  register: neutron_port_existis
+  register: neutron_port_exists
   ignore_errors: true
 
-- name: Creating bridge Interface
+- name: Creating bridge-port (end1) Interface
   environment: '{{ keystone_admin_env }}'
   become: true
   shell: ovs-vsctl add-port {{ PROVIDER_BRIDGE_NAME }} end1
-  when: neutron_port_existis is failed
+  when: neutron_port_exists is failed
 
 
 #
