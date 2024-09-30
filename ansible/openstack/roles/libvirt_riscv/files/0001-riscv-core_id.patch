@@ -1,0 +1,57 @@
+diff --git a/src/util/virhostcpu.c b/src/util/virhostcpu.c
+index a3781ca870..e727caa88a 100644
+--- a/src/util/virhostcpu.c
++++ b/src/util/virhostcpu.c
+@@ -270,6 +270,23 @@ virHostCPUGetCore(unsigned int cpu, unsigned int *core)
+     return 0;
+ }
+ 
++int
++virHostCPUGetHart(unsigned int cpu, unsigned int *hart)
++{
++    int ret = virFileReadValueUint(hart,
++                                   "%s/cpu/cpu%u/topology/die_cpus_list",
++                                   SYSFS_SYSTEM_PATH, cpu);
++
++    /* If the file is not there, it's 0 */
++    if (ret == -2)
++        *hart = 0;
++    else if (ret < 0)
++        return -1;
++
++    return 0;
++}
++
++
+ virBitmap *
+ virHostCPUGetSiblingsList(unsigned int cpu)
+ {
+@@ -411,8 +428,14 @@ virHostCPUParseNode(const char *node,
+             /* logical cpu is equivalent to a core on s390 */
+             core = cpu;
+         } else {
+-            if (virHostCPUGetCore(cpu, &core) < 0)
+-                goto cleanup;
++            int ret_value;
++            if (ARCH_IS_RISCV(arch)){
++               ret_value=virHostCPUGetHart(cpu, &core);
++            }else{
++               ret_value=virHostCPUGetCore(cpu, &core);
++            }
++            if (ret_value < 0)
++              goto cleanup;
+         }
+ 
+         virBitmapSetBitExpand(cores_maps[sock], core);
+diff --git a/src/util/virhostcpu.h b/src/util/virhostcpu.h
+index d7e09bff22..5083a20db5 100644
+--- a/src/util/virhostcpu.h
++++ b/src/util/virhostcpu.h
+@@ -70,6 +70,7 @@ int virHostCPUGetSocket(unsigned int cpu, unsigned int *socket);
+ int virHostCPUGetDie(unsigned int cpu, unsigned int *die);
+ int virHostCPUGetCluster(unsigned int cpu, unsigned int *cluster);
+ int virHostCPUGetCore(unsigned int cpu, unsigned int *core);
++int virHostCPUGetHart(unsigned int cpu, unsigned int *hart);
+ 
+ virBitmap *virHostCPUGetSiblingsList(unsigned int cpu);
+ #endif

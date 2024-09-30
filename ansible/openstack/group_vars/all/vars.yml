@@ -1,0 +1,59 @@
+#DB_root_password: 
+
+DB_root_password: 
+KEYSTONE_PASSWORD: licheepi
+
+PROVIDER_BRIDGE_NAME: br-provider
+
+RABBIT_USER: openstack
+RABBIT_PASSWORD: licheepi
+
+PLACEMENT_USER: placement
+PLACEMENT_PASSWORD: licheepi
+
+GLANCE_DB_USER: glance
+GLANCE_DB_PASSWORD: licheepi
+GLANCE_ID_PASSWORD: licheepi
+
+NEUTRON_DB_USER: neutron
+NEUTRON_DB_PASSWORD: licheepi
+
+METADATA_SECRET: licheepi
+
+NOVA_DB_USER: nova
+NOVA_DB_PASSWORD: licheepi
+
+OS_ADMIN_PASSWORD: licheepi
+OS_USERNAME_ADMIN: admin
+
+OS_REGION_NAME: RegionOne
+
+# project domain name
+OS_PROJECT_DOMAIN: Default
+# project name
+OS_PROJECT_NAME: licheenostrum
+OS_PROJECT_DESC: LicheeNostrum Cluster
+
+# user domain name
+OS_USER_DOMAIN: Default
+# username
+OS_USERNAME: licheeman
+# Password
+OS_PASSWORD: licheepi
+
+OS_AUTH_URL: "http://{{ hostvars[groups['controller_nodes'][0]]['internal_ip'] }}:5000/v3"
+#OS_AUTH_URL: "http://10.0.0.1:5000/v3"
+OS_IDENTITY_API_VERSION: 3
+OS_IMAGE_API_VERSION: 2
+
+
+keystone_admin_env:
+  OS_PROJECT_DOMAIN_NAME: "{{ OS_PROJECT_DOMAIN }}"
+  OS_USER_DOMAIN_NAME: "{{ OS_USER_DOMAIN }}"
+  OS_PROJECT_NAME: "{{ OS_USERNAME_ADMIN }}"
+  OS_USERNAME: "{{ OS_USERNAME_ADMIN }}"
+  OS_PASSWORD: "{{ OS_ADMIN_PASSWORD }}"
+  OS_AUTH_URL: "{{ OS_AUTH_URL }}"
+  OS_IDENTITY_API_VERSION: "{{ OS_IDENTITY_API_VERSION }}"
+  OS_IMAGE_API_VERSION: "{{ OS_IMAGE_API_VERSION }}"
+

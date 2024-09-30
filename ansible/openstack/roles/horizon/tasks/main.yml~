@@ -1,0 +1,25 @@
+#
+### INSTALL PACKAGES
+#
+- name: Horizon - Installing Package(s)
+  apt:
+    pkg:
+      - openstack-dashboard
+
+
+
+#- name: Horizon - /etc/openstack-dashboard/local_settings.py
+#  template:
+#    src: etc/openstack-dashboard/local_settings.py
+#    dest: /etc/openstack-dashboard/local_settings.py
+#    owner: root
+#    group: root
+#    mode: 0644
+#  notify: restart web services
+
+
+#- name: Ensure AuthorizedKeysFile is set to .ssh/authorized_keys
+#  lineinfile:
+#    dest: /etc/ssh/sshd_config
+#    regexp: AuthorizedKeysFile
+#    line: 'AuthorizedKeysFile    .ssh/authorized_keys'

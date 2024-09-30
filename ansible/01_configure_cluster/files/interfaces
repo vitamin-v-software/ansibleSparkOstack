@@ -1,0 +1,16 @@
+# interfaces(5) file used by ifup(8) and ifdown(8)
+# Include files from /etc/network/interfaces.d:
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+auto end1
+iface end1 inet static
+        address 10.0.0.1
+        netmask 255.255.0.0
+        dns-search licheenostrum.local
+        dns-nameserver 10.0.0.1
+
+auto end0
+iface end0 inet dhcp

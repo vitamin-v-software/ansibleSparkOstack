@@ -1,0 +1,57 @@
+---
+#
+## INTERNAL NETWORK SETUP 
+#
+
+- name: Enable port forwarding
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: true
+    state: present
+    reload: true
+    
+
+
+- name: Start NetworkManager
+  service:
+    name: NetworkManager
+    state: started
+    enabled: true
+
+#- name: set static IP
+#  command: "ip addr add 10.0.0.1/16 dev end1"
+
+- name: Configure NIC
+  ansible.builtin.copy:
+    src: templates/interfaces
+    dest: /etc/network/interfaces
+
+- name: Enabling NAT for internal nodes
+  become: true
+  command: "{{item}}"
+  with_items:
+    - iptables -A FORWARD -i end1 -o end0 -j ACCEPT
+    - iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+    - iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -o end0 -j MASQUERADE
+
+
+
+#
+## DHCP SERVER
+#
+
+- name: Install DHCP server on MASTER NODE
+  apt: name=isc-dhcp-server state=latest update_cache=yes
+  when: ansible_os_family == 'Debian'
+
+- name: "Configuring DHCP on nic {{dhcp_server_nic}}"
+  lineinfile:
+    dest: /etc/default/isc-dhcp-server
+    line: "INTERFACES=\"{{dhcp_server_nic}}\""
+  become: true
+
+- name: Configure HCDP
+  ansible.builtin.copy:
+    src: templates/dhcpd.conf
+    dest: /etc/dhcp/dhcpd.conf

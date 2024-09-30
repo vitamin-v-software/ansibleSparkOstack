@@ -1,0 +1,63 @@
+- name: Removing unnecessary packages
+  become: true
+  apt:
+    name: "{{ packages_to_remove }}"
+    state: absent
+
+
+- name: Comment out lines
+  lineinfile:
+    path: /etc/apt/sources.list
+    regexp: "^deb {{ item }}"
+    line: "# deb {{ item }}"
+#    state: present
+  loop:
+    - https://mirror.iscas.ac.cn/revyos/revyos-base/ sid main contrib non-free non-free-firmware
+    - https://mirror.iscas.ac.cn/revyos/revyos-addons/ revyos-addons main
+    - https://mirror.iscas.ac.cn/revyos/revyos-gles-21/ revyos-gles-21 main
+
+#    - https://mirror.iscas.ac.cn/revyos/revyos-kernels/ revyos-kernels main
+
+- name: Add debian repositories
+  lineinfile:
+    dest: /etc/apt/sources.list
+    line: "deb http://deb.debian.org/debian sid main contrib"
+    insertafter: EOF
+
+- name: Set time and date
+  command: "sudo date -s '{{timestamp}}'"
+
+
+- name: Update packages
+  become: true
+  apt:
+    update_cache: yes
+#    upgrade: yes
+
+
+- name: fix deb
+  command: "{{item}}"
+  with_items:
+    - sudo apt --fix-broken install
+    - sudo dpkg --configure -a
+    - sudo systemctl disable lightdm
+
+
+
+- name: Removing dependencies that are no longer required
+  ansible.builtin.apt:
+    autoremove: yes
+
+
+- name: Install essential packages
+  apt:
+    name: "{{essential_packages}}"
+    state: fixed
+
+- name: Enable passwordless sudo for "{{ username }}"
+  lineinfile:
+    dest: /etc/sudoers
+    regexp: "^%wheel"
+    line: "{{ username }} ALL=(ALL) NOPASSWD: ALL"
+    validate: "/usr/sbin/visudo -cf %s"
+

@@ -1,0 +1,19 @@
+
+- name: openstack - Checking if user role "{{ GLANCE_DB_USER }}" exists
+  environment: '{{ keystone_admin_env }}'
+  command: "/usr/bin/openstack user show {{ GLANCE_DB_USER }}"
+  ignore_errors: True
+  register: glance_cmd_run
+
+- name: openstack - Creating user  "{{ GLANCE_DB_USER }}"
+  environment: '{{ keystone_admin_env }}'
+  command: "openstack user create --domain {{ OS_PROJECT_DOMAIN }} {{ GLANCE_DB_USER }} --password {{ GLANCE_DB_PASSWORD }}"
+  when: glance_cmd_run is failed
+
+
+- name: openstack - Adding user "{{ GLANCE_DB_USER}}" to admin role
+  environment: '{{ keystone_admin_env }}'
+  command: "openstack role add --project {{ OS_PROJECT_NAME }} --user {{ GLANCE_DB_USER }} admin"
+
+
+

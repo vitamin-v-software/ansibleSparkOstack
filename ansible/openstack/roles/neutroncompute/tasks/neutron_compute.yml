@@ -1,0 +1,33 @@
+- name: Configure RabbitMQ
+  ini_file:
+    path: /etc/neutron/neutron.conf
+    section: DEFAULT
+    option: transport_url
+    value: 'rabbit://{{RABBIT_USER}}:{{RABBIT_PASSWORD}}@{{ hostvars[groups["controller_nodes"][0]]["internal_ip"] }}:5672/'
+
+
+- name: Configure Keystone Auth
+  ini_file:
+    path: /etc/neutron/neutron.conf
+    section: DEFAULT
+    option: auth_strategy
+    value: keystone
+
+
+- name: Configure keystone_authtoken 
+  ini_file:
+    path: /etc/neutron/neutron.conf
+    section: keystone_authtoken
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  loop:
+    - { option: "www_authenticate_uri", value: 'http://{{ hostvars[groups["controller_nodes"][0]]["internal_ip"] }}:5000/v3' }
+    - { option: "auth_url", value: 'http://{{ hostvars[groups["controller_nodes"][0]]["internal_ip"] }}:5000/v3' }
+    - { option: "project_name", value: "{{ OS_PROJECT_NAME }}" }
+    - { option: "project_domain_name", value: "{{ OS_PROJECT_DOMAIN }}" }
+    - { option: "username", value: "{{ NOVA_DB_USER }}" }
+    - { option: "user_domain_name", value: "{{ OS_USER_DOMAIN }}" }
+    - { option: "password", value: "{{ NOVA_DB_PASSWORD }}" }
+    - { option: "region_name", value: "{{ OS_REGION_NAME }}" }    
+    - { option: "auth_type", value: password }
+

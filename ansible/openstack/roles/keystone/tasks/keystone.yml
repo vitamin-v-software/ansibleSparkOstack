@@ -1,0 +1,51 @@
+# https://docs.openstack.org/keystone/pike/install/
+
+
+- name: Keystone - Configuring keystone DB connection
+  become: true
+  template:
+    src: keystone.conf
+    dest: /etc/keystone/keystone.conf
+
+- name: Keystone - Configuring Catalog 
+  become: true
+  template:
+    src: default_catalog.templates
+    dest: /etc/keystone/default_catalog.templates
+
+- name: Keystone - Waiting for the service restart
+  become: true
+  service:
+    name: keystone
+    state: restarted
+    enabled: yes
+
+
+
+- name: Keystone - DB sync
+  become: true
+  shell: sudo /usr/bin/keystone-manage db_sync
+
+- name: Keystone - Fernet key repos 1/2
+  become: true
+  shell: /usr/bin/keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+
+- name: Keystone - Fernet key repos 2/2
+  become: true
+  shell: /usr/bin/keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
+
+
+- name: Keystone - Bootstrap identity service
+  become: true
+  shell: keystone-manage bootstrap --bootstrap-password '{{ OS_ADMIN_PASSWORD }}' --bootstrap-admin-url {{ OS_AUTH_URL }} --bootstrap-internal-url {{ OS_AUTH_URL }}  --bootstrap-public-url {{ OS_AUTH_URL }}   --bootstrap-region-id {{ OS_REGION_NAME }}
+
+  register: kb
+  failed_when: "kb.rc not in [ 0, 1 ]"
+
+- name: Keystone - File permission
+  file:
+    dest=/etc/keystone
+    owner=keystone
+    group=keystone
+    recurse=yes
+

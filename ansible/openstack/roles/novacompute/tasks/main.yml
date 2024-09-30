@@ -1,0 +1,99 @@
+#
+### INSTALL PACKAGES
+# https://docs.openstack.org/nova/2023.2/install/compute-install-ubuntu.html
+
+- name: Installing Package(s)
+  become: true
+  ansible.builtin.apt:
+    name:
+      - uuid-runtime
+      - nova-compute
+      - nova-compute-qemu
+      #- nova-compute-kvm
+      #- nova-compute-lxc
+    update_cache: yes
+    state: latest
+  tags:
+    - nova_compute
+
+#
+## COMPUTE_ID
+#
+
+- name: Generating "/etc/nova/compute_id"
+  become: true
+  shell: uuidgen > /etc/nova/compute_id
+  tags:
+    - nova_compute
+
+- name: Seting "/etc/nova/compute_id" permissions
+  become: true
+  ansible.builtin.file:
+    path: /etc/nova/compute_id
+    owner: root
+    group: nova
+    mode: 0640
+  tags:
+    - nova_compute
+
+### Installing packages task already creates /etc/nova directory? -> https://docs.openstack.org/nova/2023.2/install/compute-install-ubuntu.html -> it does
+#
+## CREATING NOVA CONFIGURATION DIRECTORY
+#
+#
+#- name: Create Nova configuration directory
+#  file:
+#    path: /etc/nova
+#    state: directory
+#    mode: 0755
+
+
+#
+## CONFIGURING NOVA
+#
+
+- name: Configuring nova.conf
+  template:
+    src: nova.conf
+    dest: /etc/nova/nova.conf
+  tags:
+    - nova_compute
+
+- name: Configuring nova-compute.conf
+  ini_file:
+    path: /etc/nova/nova-compute.conf
+    section: libvirt
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  loop:
+    - { option: "cpu_mode", value: "custom" }
+    - { option: "cpu_models", value: "rv64" }
+    - { option: "inject_partitio", value: "-2" }
+  tags:
+    - nova_compute
+
+- name: Adding to sudoers
+  become: true
+  shell: 'echo "nova ALL = (root) NOPASSWD: /usr/bin/nova-rootwrap /etc/nova/rootwrap.conf *" >> /etc/sudoers'
+  tags:
+    - nova_compute
+
+
+#
+## restart service
+#
+- name: waiting for service restart
+  become: true
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - nova-compute
+  tags:
+    - nova_compute
+
+
+- name: Install libvirt and patch
+  import_tasks: libvirt.yml
+  tags:
+    - libvirt-nova

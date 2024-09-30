@@ -1,0 +1,68 @@
+
+- name: openstack - Checking if user role "{{ GLANCE_DB_USER }}" exists
+  environment: '{{ keystone_admin_env }}'
+  command: "/usr/bin/openstack user show {{ GLANCE_DB_USER }}"
+  ignore_errors: True
+  register: glance_cmd_run
+
+- name: openstack - Creating user  "{{ GLANCE_DB_USER }}"
+  environment: '{{ keystone_admin_env }}'
+  command: "openstack user create --domain {{ OS_PROJECT_DOMAIN }} {{ GLANCE_DB_USER }} --password {{ GLANCE_DB_PASSWORD }}"
+  when: glance_cmd_run is failed
+
+
+- name: openstack - Adding user "{{ GLANCE_DB_USER}}" to admin role
+  environment: '{{ keystone_admin_env }}'
+  command: "openstack role add --project {{ OS_PROJECT_NAME }} --user {{ GLANCE_DB_USER }} admin"
+
+
+
+
+
+
+
+
+
+
+
+#- name: openstack - Creating image service
+#  environment: '{{ keystone_admin_env }}'
+#  command: openstack service create --name glance --description "OpenStack Image" image
+
+
+#- name: openstack - Creating image API service public endpoints 
+#  environment: '{{ keystone_admin_env }}'
+#  command: "openstack endpoint create --region {{ OS_REGION_NAME }}  image public http://{{ hostvars[groups['controller_nodes'][0]]['internal_ip'] }}:9292"
+
+#- name: openstack - Creating image API service internal endpoints 
+#  environment: '{{ keystone_admin_env }}'
+#  command: "openstack endpoint create --region {{ OS_REGION_NAME }}  image internal http://{{ hostvars[groups['controller_nodes'][0]]['internal_ip'] }}:9292"
+
+#- name: openstack - Creating image API service admin endpoints 
+#  environment: '{{ keystone_admin_env }}'
+#  command: "openstack endpoint create --region {{ OS_REGION_NAME }}  image admin http://{{ hostvars[groups['controller_nodes'][0]]['internal_ip'] }}:9292"
+  
+
+
+#- name: openstack - Setting quota limit (1/4)
+#  environment: '{{ keystone_admin_env }}'
+#  command: "openstack --os-cloud devstack-system-admin registered limit create --service glance --default-limit 1000 --region {{ OS_REGION_NAME }} image_size_total"
+#
+#- name: openstack - Setting quota limit (2/4)
+#  environment: '{{ keystone_admin_env }}'
+#  command: "openstack --os-cloud devstack-system-admin registered limit create --service glance --default-limit 1000 --region {{ OS_REGION_NAME }} image_stage_total"
+#
+#- name: openstack - Setting quota limit (3/4)
+#  environment: '{{ keystone_admin_env }}'
+#  command: "openstack --os-cloud devstack-system-admin registered limit create --service glance --default-limit 100 --region {{ OS_REGION_NAME }} image_count_total"
+#
+#- name: openstack - Setting quota limit (4/4)
+#  environment: '{{ keystone_admin_env }}'
+#  command: "openstack --os-cloud devstack-system-admin registered limit create --service glance --default-limit 100 --region {{ OS_REGION_NAME }} image_count_uploading"
+
+
+
+
+
+
+

@@ -1,0 +1,18 @@
+
+- name: Setup Mount Point
+  become: true
+  ansible.posix.mount:
+    path: "{{ storage_home_dir }}"
+    src: "{{ storage_physical_dev }}"
+    fstype: ext4
+    state: mounted
+
+
+- name: Ensure Permissions
+  become: true
+  file:
+    path: "{{ storage_home_dir }}"
+    mode: 0777
+    state: directory
+
+

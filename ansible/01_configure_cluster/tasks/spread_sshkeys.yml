@@ -1,0 +1,15 @@
+
+- name: Copy SSH key for user "{{ username }}"
+  ansible.builtin.copy:
+    src: "{{ './files/' + username }}.pub"
+    dest: .ssh/id_rsa.pub
+    mode: 0600
+    owner: "{{ username }}"
+    group: "{{ username }}"
+
+
+- name: Spread SSH-key (rest of nodes)
+  command: ssh-copy-id {{ hostvars[item].ansible_user  }}@{{ hostvars[item].ansible_host }} 
+  when: hostvars[item].ansible_host is defined
+  with_items: "{{ groups.compute }}"
+

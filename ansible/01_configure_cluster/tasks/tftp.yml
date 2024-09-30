@@ -1,0 +1,47 @@
+
+
+- name: Install Server 
+  become: true
+  apt:
+    update_cache: yes
+    pkg:
+      - tftpd-hpa
+
+- name: Setting TFTP home
+  become: true
+  file:
+    path: "{{ tftp_root_dir }}"
+    mode: 0777
+    state: directory
+    owner: tftp
+    group: tftp
+
+- name: Setting NFS home
+  become: true
+  file:
+    path: "{{ tfpt_nfs_root_dir }}"
+    mode: 0777
+    state: directory
+
+
+- name: Configuring TFTP Server
+  become: true
+  template:
+    dest: /etc/default/tftpd-hpa
+    src: tftpd-hpa.template
+
+
+- name: Service enable TFTP Server 
+  systemd:
+    name: tftpd-hpa
+    enabled: yes
+    daemon_reload: yes
+
+
+- name: Exporting NFS root
+  ansible.builtin.lineinfile:
+    path: /etc/exports
+    line: '{{ tfpt_nfs_root_dir }} *(rw,sync,no_root_squash,no_subtree_check)'
+    state: present
+
+

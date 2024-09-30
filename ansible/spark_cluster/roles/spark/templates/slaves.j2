@@ -1,0 +1,5 @@
+{% for host in groups['nodes'] %}
+#{{ hostvars[host]['ansible_hostname'] }}.{{ ansible_domain }}
+{{ hostvars[host]['ansible_hostname'] }}
+
+{% endfor %}

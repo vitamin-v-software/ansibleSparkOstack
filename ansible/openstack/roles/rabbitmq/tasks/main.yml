@@ -1,0 +1,26 @@
+##
+### Install Guide : 
+### Verify install: 
+##
+
+#
+### INSTALL PACKAGES
+#
+- name: RabbitMQ - Installing Package(s)
+  apt:
+    pkg:
+      - rabbitmq-server 
+
+
+- name: Creating user "{{ RABBIT_USER}}"
+  become: true
+  command: "rabbitmqctl add_user {{ RABBIT_USER }} {{ RABBIT_PASSWORD }}"
+  ignore_errors: true
+
+- name: Setting permits for user "{{ RABBIT_USER}}"
+  become: true
+  command: 'rabbitmqctl set_permissions {{ RABBIT_USER}}  ".*" ".*" ".*"'
+
+
+
+

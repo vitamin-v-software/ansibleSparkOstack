@@ -1,0 +1,175 @@
+##
+### - MUST- Network overview: https://docs.openstack.org/neutron/latest/install/overview.html
+### Install Guide : https://docs.openstack.org/neutron/latest/install/index.html
+### Verify install: 
+##
+
+#
+### INSTALL PACKAGES
+#
+#
+# from doc
+#The common agents are
+#   L3 (layer 3),
+#   DHCP (dynamic host IP addressing)
+#   and a plug-in agent.
+
+- name: Neutron SERVER - Installing Package(s)
+  apt:
+    pkg:
+      - neutron-api
+      - neutron-server
+      - neutron-metadata-agent
+      - neutron-plugin-ml2
+      - neutron-dhcp-agent
+      - neutron-openvswitch-agent
+      #- neutron-l3-agent
+       
+
+#
+### INSTALL & CONFIG DATABASE
+#
+- include_tasks: configure_db.yml
+
+
+#
+### DOMAIN
+#
+- include_tasks: domain.yml
+
+#
+###
+#
+- name: configuring neutron
+  template:
+    src: neutron.conf
+    dest: /etc/neutron/neutron.conf
+
+- name: configure metadata-agent
+  template:
+    src: metadata_agent.ini
+    dest: /etc/neutron/metadata_agent.ini
+
+
+- name: configuring ml2 
+  template:
+    src: ml2_conf.ini
+    dest: /etc/neutron/plugins/ml2/ml2_conf.ini
+
+- name: configuring openvswitch
+  template:
+    src: openvswitch_agent.ini 
+    dest: /etc/neutron/plugins/ml2/openvswitch_agent.ini
+
+- name: configuring l3 agent
+  template:
+    src: l3_agent.ini
+    dest: /etc/neutron/l3_agent.ini
+
+- name: configuring dhcp
+  template:
+    src: dhcp_agent.ini
+    dest: /etc/neutron/dhcp_agent.ini
+
+
+
+
+#
+### CHANGE NOVA TO USE NEUTRON
+#
+# I'm not using a temple here so we make sure not to override other section configs
+- name: Configure NOVA neutron section
+  ini_file:
+    path: /etc/nova/nova.conf
+    section: neutron
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  loop:
+    - { option: "auth_url", value: 'http://{{ hostvars[groups["controller_nodes"][0]]["internal_ip"] }}:5000' }
+    - { option: "auth_type", value: password }
+    - { option: "project_domain_name", value: "{{ OS_PROJECT_DOMAIN }}" }
+    - { option: "user_domain_name", value: "{{ OS_USER_DOMAIN }}" }
+    - { option: "region_name", value: "{{ OS_REGION_NAME }}" }
+    - { option: "project_name", value: "{{ OS_PROJECT_NAME }}" }
+    - { option: "username", value: "{{ NEUTRON_DB_USER }}" }
+    - { option: "password", value: "{{ NEUTRON_DB_PASSWORD }}" }
+    - { option: "service_metadata_proxy", value: "true" }
+    - { option: "metadata_proxy_shared_secret", value: "{{ METADATA_SECRET }}" }
+
+
+
+- name: Checking if bridge Exists
+  environment: '{{ keystone_admin_env }}'
+  become: true
+  shell: ovs-vsctl br-exists br-ex
+  register: neutron_br_existis
+
+- name: Creating bridge Interface
+  environment: '{{ keystone_admin_env }}'
+  become: true
+  shell: ovs-vsctl add-br br-ex
+  when: neutron_br_existis is failed
+
+- name: Checking if bridge Exists
+  environment: '{{ keystone_admin_env }}'
+  become: true
+  shell: ovs-vsctl port-to-br end1
+  register: neutron_port_existis
+
+- name: Creating bridge Interface
+  environment: '{{ keystone_admin_env }}'
+  become: true
+  shell: ovs-vsctl add-port br-ex end1
+  when: neutron_port_existis is failed
+
+
+
+- name: Modprobe br_netfilter
+  become: true
+  modprobe:
+    name: br_netfilter
+    state: present
+- name: set net.bridge.bridge-nf-call-iptables
+  become: true
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: '1'
+    reload: yes
+- name: set net.bridge.bridge-nf-call-ip6tables
+  become: true
+  sysctl:
+    name: net.bridge.bridge-nf-call-ip6tables
+    value: '1'
+    reload: yes
+
+
+
+- name: Populating NEUTRON DB
+  environment: '{{ keystone_admin_env }}'
+  become: true
+  command: neutron-db-manage --config-file /etc/neutron/neutron.conf --config-file /etc/neutron/plugins/ml2/ml2_conf.ini upgrade head
+
+
+
+
+
+#
+## restart service
+#
+- name: Waiting for service restart
+  become: true
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - nova-api
+    - neutron-api
+    - neutron-rpc-server
+    - neutron-metadata-agent
+    - neutron-dhcp-agent
+    #- neutron-l3-agent
+    #- neutron-openvswitch-agent
+
+
+
+#For networking option 2, also restart the layer-3 service:

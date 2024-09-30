@@ -1,0 +1,14 @@
+- name: Remove libvirt
+  ansible.builtin.apt:
+    name:
+      - libvirt-daemon
+      - libvirt-clients
+      - libvirt-dev
+    state: absent
+  become: yes
+
+- name: Remove libvirt source directory
+  ansible.builtin.file:
+    path: /tmp/libvirt
+    state: absent
+  become: yes

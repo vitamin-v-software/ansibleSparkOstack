@@ -1,0 +1,22 @@
+[controller]
+#licheenostrum.int.bsc.es ansible_host=192.168.10.18  ansible_user=sipeed ansible_connection=ssh ansible_python_interpreter=/usr/bin/python3 ansible_host_name=controller01 ansible_host_private=10.0.0.1 ansible_host_full_name=controller01.licheenostrum.local
+#ansible_ssh_private_key_file=ssh/sipeed 
+
+
+[compute]
+#ln01.licheenostrum.local ansible_host=10.0.0.10 ansible_user=sipeed ansible_host_name=ln01
+ln02.licheenostrum.local ansible_host=10.0.0.12 ansible_user=sipeed ansible_host_name=ln02
+#ln03.licheenostrum.local ansible_host=10.0.0.14 ansible_user=sipeed ansible_host_name=ln03
+#ln04.licheenostrum.local ansible_host=10.0.0.16 ansible_user=sipeed ansible_host_name=ln04
+
+[compute:vars]
+ansible_ssh_common_args='-o ProxyCommand="ssh -p 22 -W %h:%p -q sipeed@licheenostrum.int.bsc.es"'
+
+
+[storage]
+#st01.licheenostrum.local ansible_host=10.0.0.18 ansible_user=sipeed ansible_host_name=st01
+
+[storage:vars]
+#ansible_ssh_common_args='-o ProxyCommand="ssh -p 22 -W %h:%p -q sipeed@licheenostrum.int.bsc.es"'
+
+

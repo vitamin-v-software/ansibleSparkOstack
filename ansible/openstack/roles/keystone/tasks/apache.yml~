@@ -1,0 +1,32 @@
+
+
+- name: Keystone - Configure Apache Server
+  become: true
+  template:
+    src: wsgi-keystone.conf
+    dest: /etc/apache2/sites-enabled/wsgi-keystone.conf
+
+
+- name: Keystone - Setting Apache2 server name 1/2
+  lineinfile:
+    state: absent
+    path: /etc/apache2/apache2.conf
+    regexp: "ServerName "
+  check_mode: true
+  changed_when: false # This just makes things look prettier in the logs
+  register: check
+
+- name: Keystone - Setting Apache2 server name 2/2
+  lineinfile:
+    state: present
+    path: /etc/apache2/apache2.conf
+    line: ServerName {{ internal_ip }}
+
+
+- name: Keystone - Waiting for Apache service restart
+  become: true
+  service:
+    name: apache2
+    state: restarted
+    enabled: yes
+  

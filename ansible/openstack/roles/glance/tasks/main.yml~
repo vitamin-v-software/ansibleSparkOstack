@@ -1,0 +1,19 @@
+#
+### INSTALL PACKAGES
+#
+- name: Glance - Installing Package(s)
+  apt:
+    pkg:
+      - glance
+
+
+- import_tasks: domain.yml
+
+- name: Glance - Configuring DB connection
+  template:
+    src: glance-api.conf
+    dest: /etc/glance/glance-api.conf
+  notify:
+  - restart glance
+
+

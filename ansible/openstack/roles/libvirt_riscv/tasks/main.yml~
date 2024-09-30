@@ -1,0 +1,47 @@
+
+- name: libvirt cloning from github
+  ansible.builtin.git:
+    repo: 'https://github.com/libvirt/libvirt'
+    dest: /tmp/libvirt
+    version: 1678e633cf749c4fe0cdebe079fa3ae0bc93d8a7
+
+- name: libvirt installing deps
+  become: true
+  ansible.builtin.apt:
+    name:
+      - meson
+      - ninja-build
+      - python3-httplib2
+      - xsltproc
+      - libglib2.0-dev
+      - libgnutls28-dev
+      - libyajl-dev
+      - yajl-tools
+      - libtirpc-dev
+      - libudev-dev
+      - libpciaccess-dev
+    update_cache: yes 
+    state: latest
+
+- name: libvirt configure project 1/2
+  become: true
+  shell: meson configure
+  args:
+    chdir: /tmp/libvirt
+
+- name: libvirt configure project 2/2
+  become: true
+  shell: meson setup build -Dsystem=true -Ddriver_qemu=enabled -Ddriver_libvirtd=enabled -Ddriver_remote=enabled -Ddriver_network=enabled -Ddriver_interface=enabled --reconfigure
+  args:
+    chdir: /tmp/libvirt
+
+
+- name: libvirt build
+  become: true
+  shell: ninja -C build/ install
+  args:
+    chdir: /tmp/libvirt
+
+
+
+

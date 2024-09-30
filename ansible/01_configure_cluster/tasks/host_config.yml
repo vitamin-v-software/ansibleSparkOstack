@@ -1,0 +1,32 @@
+
+- name: Configure hostname
+  hostname:
+    name: "{{ ansible_host_name }}"
+
+- name: Configure Hosts
+  template:
+    src: templates/hosts.j2
+    dest: /etc/hosts
+    owner: root
+    mode: 0644
+
+- name: Populating /etc/hosts with compute node info
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item].ansible_host }} {{ hostvars[item].ansible_host_name }} {{item}}"
+    state: present
+  when: hostvars[item].ansible_host is defined
+  with_items: "{{ groups.compute }}"
+
+
+- name: Populating /etc/hosts with controller node info
+  lineinfile:
+    dest: /etc/hosts
+    regexp: '.*{{ item }}$'
+    line: "{{ hostvars[item].ansible_host_private }} {{ hostvars[item].ansible_host_name }} {{ hostvars[item].ansible_host_full_name}}"
+    state: present
+  when: hostvars[item].ansible_host_private is defined
+  with_items: "{{ groups.controller }}"
+
+

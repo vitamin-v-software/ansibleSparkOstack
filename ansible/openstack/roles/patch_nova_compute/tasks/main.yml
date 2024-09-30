@@ -1,0 +1,15 @@
+- name: patch nova-compute fields.py
+  become: true
+  ansible.builtin.copy:
+    src: files/fields.py
+    dest: /usr/lib/python3/dist-packages/nova/objects/fields.py
+  tags:
+    - patch_nova_compute
+
+- name: patch nova-compute arch.py
+  become: true
+  ansible.builtin.copy:
+    src: files/arch.py
+    dest: /usr/lib/python3/dist-packages/nova/virt/arch.py
+  tags:
+    - patch_nova_compute

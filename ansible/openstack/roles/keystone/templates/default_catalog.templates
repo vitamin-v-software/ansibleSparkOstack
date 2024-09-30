@@ -1,0 +1,41 @@
+# config for templated.Catalog, using camelCase because I don't want to do
+# translations for keystone compat
+catalog.{{ OS_REGION_NAME }}.identity.publicURL = http://{{external_ip}}:5000/v3
+catalog.{{ OS_REGION_NAME }}.identity.adminURL = http://{{internal_ip}}:5000/v3
+catalog.{{ OS_REGION_NAME }}.identity.internalURL = http://{{internal_ip}}:5000/v3
+catalog.{{ OS_REGION_NAME }}.identity.descrition = "Identity Service"
+catalog.{{ OS_REGION_NAME }}.identity.name = Identity Service
+
+catalog.{{ OS_REGION_NAME }}.placement.publicURL = http://{{external_ip}}:8778
+catalog.{{ OS_REGION_NAME }}.placement.adminURL = http://{{internal_ip}}:8778
+catalog.{{ OS_REGION_NAME }}.placement.internalURL = http://{{internal_ip}}:8778
+catalog.{{ OS_REGION_NAME }}.placement.name = Placement Service
+
+catalog.{{ OS_REGION_NAME }}.image.publicURL = http://{{external_ip}}:9292
+catalog.{{ OS_REGION_NAME }}.image.adminURL = http://{{internal_ip}}:9292
+catalog.{{ OS_REGION_NAME }}.image.internalURL = http://{{internal_ip}}:9292
+catalog.{{ OS_REGION_NAME }}.image.descrition = "Image Service"
+catalog.{{ OS_REGION_NAME }}.image.name = glance
+
+catalog.{{ OS_REGION_NAME }}.compute.publicURL = http://{{external_ip}}:8774/v2.1
+catalog.{{ OS_REGION_NAME }}.compute.adminURL = http://{{internal_ip}}:8774/v2.1
+catalog.{{ OS_REGION_NAME }}.compute.internalURL = http://{{internal_ip}}:8774/v2.1
+catalog.{{ OS_REGION_NAME }}.compute.name = Compute Service V2.1
+
+catalog.{{ OS_REGION_NAME }}.network.publicURL = http://{{internal_ip}}:9696
+catalog.{{ OS_REGION_NAME }}.network.adminURL = http://{{internal_ip}}:9696
+catalog.{{ OS_REGION_NAME }}.network.internalURL = http://{{internal_ip}}:9696
+catalog.{{ OS_REGION_NAME }}.network.name = neutron
+
+catalog.{{ OS_REGION_NAME }}.orchestration.publicURL = http://{{internal_ip}}:8004/v1/$(tenant_id)s
+catalog.{{ OS_REGION_NAME }}.orchestration.adminURL = http://{{internal_ip}}:8004/v1/$(tenant_id)s
+catalog.{{ OS_REGION_NAME }}.orchestration.internalURL = http://{{internal_ip}}:8004/v1/$(tenant_id)s
+catalog.{{ OS_REGION_NAME }}.orchestration.name = Orchestration Service
+
+#catalog.{{ OS_REGION_NAME }}.volumev3.publicURL = http://{{external_ip}}:8776/v3
+#catalog.{{ OS_REGION_NAME }}.volumev3.adminURL = http://{{internal_ip}}:8776/v3
+#catalog.{{ OS_REGION_NAME }}.volumev3.internalURL = http://{{internal_ip}}:8776/v3
+#catalog.{{ OS_REGION_NAME }}.volumev3.name = Volume Service V3
+
+
+

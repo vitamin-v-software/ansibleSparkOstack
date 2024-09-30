@@ -1,0 +1,36 @@
+
+- name: set Hadoop yasieso
+  set_fact: hadoop_url=https://dlcdn.apache.org/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz
+
+- name: set Hadoop Basedir
+  set_fact: hadoop_basedir=/opt/hadoop/
+
+- name: set Hadoop Home
+  set_fact: shadoop_home={{ hadoop_basedir} /{{ (hadoop_url | basename).split(".")[:-1] | join(".") }}
+
+- name: Downloading Hadoop
+  ansible.builtin.get_url:
+    url: "{{ hadoop_url }}"
+    dest: "/tmp/{{ hadoop_url | basename }}"
+    mode: '0777'
+
+- name: create install directory
+  file:
+    path: "{{ hadoop_basedir }}"
+    state: directory
+
+- name: Extracting Hadoop files
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ hadoop_url | basename }}"
+    dest: "{{ hadoop_basedir }}"
+    remote_src: yes
+    mode: '0777'
+
+- name: Ensuring permissions
+  ansible.builtin.file:
+    path: "{{ hadoop_home }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+    recurse: yes
+

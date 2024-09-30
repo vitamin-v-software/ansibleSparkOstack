@@ -1,0 +1,75 @@
+
+- name: libvirt cloning from github
+  ansible.builtin.git:
+    repo: 'https://github.com/libvirt/libvirt'
+    dest: /tmp/libvirt
+    version: 92333a2c4e8cc547ef73f69b8fe52b8323ff9f6c
+  tags:
+    - libvirt_nova
+
+- name: libvirt uploading riscv patch
+  ansible.builtin.copy:
+    src: files/0001-riscv-core_id.patch
+    dest: /tmp/libvirt/0001-riscv-core_id.patch
+  tags:
+   - libvirt_nova
+
+- name: libvirt applying riscv patch
+  shell: git apply --ignore-space-change --ignore-whitespace 0001-riscv-core_id.patch
+  args:
+    chdir: /tmp/libvirt
+  tags:
+    - libvirt_nova
+
+- name: Configure NIC
+  ansible.builtin.copy:
+    src:
+    dest: /etc/network/interfaces
+  tags:
+    - libvirt_nova
+
+- name: libvirt installing deps
+  become: true
+  ansible.builtin.apt:
+    name:
+      - meson
+      - ninja-build
+      - python3-httplib2
+      - xsltproc
+      - libglib2.0-dev
+      - libgnutls28-dev
+      - libyajl-dev
+      - yajl-tools
+      - libtirpc-dev
+      - libudev-dev
+      - libpciaccess-dev
+    update_cache: yes
+    state: latest
+  tags:
+    - libvirt_nova
+
+- name: libvirt configure project 1/2
+  become: true
+  shell: meson configure
+  args:
+    chdir: /tmp/libvirt
+  tags:
+    - libvirt_nova
+
+- name: libvirt configure project 2/2
+  become: true
+  shell: meson setup build -Dsystem=true -Ddriver_qemu=enabled -Ddriver_libvirtd=enabled -Ddriver_remote=enabled -Ddriver_network=enabled -Ddriver_interface=enabled --reconfigure
+  args:
+    chdir: /tmp/libvirt
+  tags:
+    - libvirt_nova
+
+
+- name: libvirt build
+  become: true
+  shell: ninja -C build/ install
+  args:
+    chdir: /tmp/libvirt
+  tags:
+    - libvirt_nova
+

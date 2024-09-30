@@ -1,0 +1,40 @@
+
+##
+### Install Guide : https://docs.openstack.org/neutron/2023.2/install/compute-install-ubuntu.html
+### Verify install: 
+##
+
+#
+### INSTALL PACKAGES
+#
+- name: Installing Package(s)
+  apt:
+    pkg:
+      - neutron-dhcp-agent
+
+
+#
+### DHCP AGENT
+#
+- name: Configure DHCP Agent
+  ini_file:
+    path: /etc/neutron/dhcp_agent.ini
+    section: DEFAULT
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  loop:
+    - { option: "interface_driver", value: "openvswitch" }
+    - { option: "dhcp_driver", value: "neutron.agent.linux.dhcp.Dnsmasq" }
+    - { option: "enable_isolated_metadata", value: "true" }
+
+
+#
+## SERVICE RESTART
+#
+- name: Waiting for service restart
+  become: true
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - neutron-dhcp-agent

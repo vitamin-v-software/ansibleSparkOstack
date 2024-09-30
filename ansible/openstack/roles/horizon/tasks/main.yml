@@ -1,0 +1,34 @@
+#
+### INSTALL PACKAGES
+#
+- name: Horizon - Installing Package(s)
+  apt:
+    pkg:
+      - openstack-dashboard
+      - openstack-dashboard-apache
+#     - libapache2-mod-wsgi-py3
+
+- name: Horizon - Configuring local_settings.py 
+  lineinfile:
+    dest: /etc/openstack-dashboard/local_settings.py
+    regexp: ALLOWED_HOSTS
+    line: ALLOWED_HOSTS = [ '*' ]
+
+
+
+# name: Horizon - Configuring apache2
+# template:
+#   src: apache.horizon.conf
+#   dest: /etc/apache2/sites-enabled/horizon.conf
+
+- name: KAKAKA
+  become: true
+  command: sudo a2enmod ssl
+
+- name: Horizon  - Waiting for Apache service restart
+  become: true
+  service:
+    name: apache2
+    state: restarted
+    enabled: yes
+

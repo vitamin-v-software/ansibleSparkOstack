@@ -1,0 +1,15 @@
+- name: Nova Server - Configure DB (1/2)
+  template:
+    src: mysql.sql
+    dest: /tmp/nova_db.sql
+
+- name: Nova Server - Configure DB (2/2)
+  become: true
+  shell: mysql -u root < /tmp/nova_db.sql
+
+
+#templates/mysql.sql
+
+
+
+

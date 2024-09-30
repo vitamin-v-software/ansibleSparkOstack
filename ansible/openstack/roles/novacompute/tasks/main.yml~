@@ -1,0 +1,69 @@
+#
+### INSTALL PACKAGES
+# https://docs.openstack.org/nova/2023.2/install/compute-install-ubuntu.html
+
+- name: Installing Package(s)
+  become: true
+  ansible.builtin.apt:
+    name: 
+      - nova-compute
+      #- nova-conductor
+      #- nova-compute-kvm
+      - nova-compute-qemu
+      #- nova-compute-ironic
+      #- nova-compute-lxc
+      - uuid-runtime
+
+    update_cache: yes 
+    state: latest
+
+
+
+#
+## COMPUTE_ID
+#
+- name: Generating "/etc/nova/compute_id"
+  become: true
+  shell: uuidgen > /etc/nova/compute_id
+
+- name: Seting "/etc/nova/compute_id" permissions
+  become: true
+  ansible.builtin.file:
+    path: /etc/nova/compute_id
+    owner: root
+    group: nova
+    mode: 0640
+
+
+#
+## CONFIGURING NOVA
+#
+- name: Configuring nova.conf
+  template:
+    src: nova.conf
+    dest: /etc/nova/nova.conf
+
+- name: Configuring nova-compute.conf
+  ini_file:
+    path: /etc/nova/nova-compute.conf
+    section: libvirt
+    option: virt_type
+    value: qemu
+
+
+- name: Adding to sudoers
+  become: true
+  shell: 'echo "nova ALL = (root) NOPASSWD: /usr/bin/nova-rootwrap /etc/nova/rootwrap.conf *" >> /etc/sudoers'
+
+
+#
+## restart service
+#
+- name: waiting for service restart
+  become: true
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - nova-compute
+

@@ -1,0 +1,63 @@
+
+- name: qemu installing deps
+  become: true
+  ansible.builtin.apt:
+    name:
+      - libglib2.0-dev
+      - libfdt-dev
+      - libpixman-1-dev
+      - zlib1g-dev
+      - ninja-build
+      - flex
+      - bison
+      - libspice-protocol-dev
+      - libspice-server-dev
+      - libslirp-dev
+      - libvirglrenderer-dev
+      - libvde-dev
+      - libvdeplug-dev
+      - libvte-2.91-dev
+    update_cache: yes
+    state: latest
+  tags:
+    - qemu
+
+- name: cloning qemu from github
+  ansible.builtin.git:
+    repo: 'https://github.com/qemu/qemu'
+    dest: /tmp/qemu
+    version: ad10b4badc1dd5b28305f9b9f1168cf0aa3ae946
+  tags:
+    - qemu
+
+- name: prepare qemu build
+  become: true
+  shell: mkdir -p /tmp/qemu/build
+  tags:
+    - qemu
+
+- name: configure riscv64-system
+  become: true
+  shell: ../configure --target-list=riscv64-softmmu
+  args:
+    chdir: /tmp/qemu/build
+  tags:
+    - qemu
+
+
+- name: building
+  become: true
+  shell: make
+  args:
+    chdir: /tmp/qemu/build
+  tags:
+    - qemu
+
+- name: Installing
+  become: true
+  shell: make install
+  args:
+    chdir: /tmp/qemu/build
+  tags:
+    - qemu
+

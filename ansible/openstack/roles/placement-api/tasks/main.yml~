@@ -1,0 +1,57 @@
+##
+### Install Guide : https://docs.openstack.org/placement/latest/install/
+### Verify install: https://docs.openstack.org/placement/latest/install/verify.html
+##
+
+#
+### INSTALL PACKAGES
+#
+- name: Placement API - Installing Package(s)
+  apt:
+    pkg:
+      - apache2
+      - libapache2-mod-wsgi-py3
+      - placement-api
+
+
+#
+## DB
+#
+- name: Placement API - Configuring DB, rendering SQL template (1/3)
+  template:
+    src: mysql.sql
+    dest: /tmp/_placement-api.sql
+
+- name: Placement API - Configuring DB, running SQL commands (2/3)
+  become: true
+  shell: mysql -u root < /tmp/_placement-api.sql
+
+- name: Placement API - Configuring DB, removing SQL template  (3/3)
+  ansible.builtin.file:
+    path: /tmp/_placement-api.sql
+    state: absent
+
+
+- include_tasks: domain.yml
+
+
+#
+## Configuring placement
+#
+- name: Placement API - /etc/placement/placement.conf
+  template:
+    src: placement.conf
+    dest: /etc/placement/placement.conf
+    
+- name: Placement API - running db sync
+  become: true
+  command: placement-manage db sync
+
+#
+## restart service
+#
+- name: Placement API - waiting for service restart
+  service:
+    name: placement-api
+    state: restarted
+

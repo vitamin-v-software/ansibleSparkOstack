@@ -1,0 +1,14 @@
+##
+### Install Guide : 
+### Verify install: 
+##
+
+#
+### INSTALL PACKAGES
+#
+- name: RabbitMQ - Installing Package(s)
+  apt:
+    pkg:
+      - rabbitmq-server 
+
+

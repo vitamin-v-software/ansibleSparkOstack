@@ -1,0 +1,16 @@
+
+- name: Install Server 
+  become: true
+  apt:
+    update_cache: yes
+    pkg:
+      - nfs-kernel-server
+
+
+- name: Preparing NFS home 
+  become: true
+  file:
+    path: "{{ nfs_root_dir }}"
+    mode: 0777
+    state: directory
+

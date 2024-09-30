@@ -1,0 +1,48 @@
+##
+## https://docs.openstack.org/keystone/pike/install/keystone-users-ubuntu.html
+##
+#
+
+- name: Keystone - Checking if project "{{ OS_PROJECT_NAME }} exists"
+  environment: "{{ keystone_admin_env }}"
+  command: "/usr/bin/openstack project show {{ OS_PROJECT_NAME }}"
+  ignore_errors: True
+  register: keystone_cmd_run
+ 
+- name: Keystone - Creating project "{{ OS_PROJECT_NAME }}"
+  environment: "{{ keystone_admin_env }}"
+  command: "/usr/bin/openstack project create --domain {{ OS_PROJECT_DOMAIN }} --description '{{ OS_PROJECT_DESC }}' {{ OS_PROJECT_NAME }}"
+  when: keystone_cmd_run is failed
+
+
+
+- name: Keystone - Checking if non-admin user "{{ OS_USERNAME }}" exists
+  environment: '{{ keystone_admin_env }}'
+  command: "/usr/bin/openstack user show {{ OS_USERNAME }}"
+  ignore_errors: True
+  register: keystone_cmd_run
+
+- name: Keystone - Creating non-admin user "{{ OS_USERNAME }}"
+  environment: '{{ keystone_admin_env }}'
+  command: "/usr/bin/openstack user create --domain {{ OS_PROJECT_DOMAIN }} --password '{{ OS_PASSWORD }}' {{ OS_USERNAME }}"
+  when: keystone_cmd_run is failed
+
+
+
+- name: Keystone - Checking if user role "{{ OS_USERNAME }}" exists
+  environment: '{{ keystone_admin_env }}'
+  command: "/usr/bin/openstack role show {{ OS_USERNAME }}"
+  ignore_errors: True
+  register: keystone_cmd_run
+
+- name: Keystone - Creating user role "{{ OS_USERNAME}}"
+  environment: '{{ keystone_admin_env }}'
+  command: "/usr/bin/openstack role create {{ OS_USERNAME }}"
+  when: keystone_cmd_run is failed
+
+
+
+- name: Keystone - Link user "{{ OS_USERNAME }}" to role "{{ OS_USERNAME}}"
+  environment: '{{ keystone_admin_env }}'
+  command: "/usr/bin/openstack role add --project {{ OS_PROJECT_NAME }} --user {{ OS_USERNAME }} {{ OS_USERNAME }}"
+

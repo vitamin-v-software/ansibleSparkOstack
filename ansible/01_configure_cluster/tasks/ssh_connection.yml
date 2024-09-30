@@ -1,0 +1,27 @@
+#---
+#"{{ username }}"
+
+- name: Adding SSH to authorized keys for user
+  ansible.posix.authorized_key:
+    user: "{{username}}"
+    state: present
+    key: "{{ lookup('file','./files/' + username + '.pub') }}"
+
+
+- name: Copy SSH private key for user "{{ username }}"
+  ansible.builtin.copy:
+    src: "{{ './files/' + username }}"
+    dest: .ssh/id_rsa
+    mode: 0600
+    owner: "{{ username }}"
+    group: "{{ username }}"
+
+
+- name: Enable passwordless sudo for user "{{ username }}"
+  lineinfile:
+    dest: /etc/sudoers
+    regexp: "^%wheel"
+    line: "{{ username }} ALL=(ALL) NOPASSWD: ALL"
+    validate: "/usr/sbin/visudo -cf %s"
+
+

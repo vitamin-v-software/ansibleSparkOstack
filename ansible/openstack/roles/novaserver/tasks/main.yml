@@ -1,0 +1,61 @@
+##
+### Install Guide : https://docs.openstack.org/nova/queens/install/controller-install-ubuntu.html
+### Verify install: 
+##
+
+#
+### INSTALL PACKAGES
+#
+- name: Nova SERVER - Installing Package(s)
+  apt:
+    pkg:
+      - nova-api
+      - nova-common
+      - nova-conductor
+      - nova-consoleproxy
+      - nova-scheduler
+# From Doc but missing in debian:
+#      - nova-placement-api
+#      - nova-consoleauth
+
+
+#
+### INSTALL & CONFIG DATABASE
+#
+- include_tasks: configure_db.yml
+
+#
+### NOVA
+#
+- name: Nova SERVER - Configuring Server
+  template:
+    src: nova.conf
+    dest: /etc/nova/nova.conf
+
+
+#
+### CONFIG DOMAIN
+#
+- name: Adding node to Nova SERVER - running nova-manage cell_v2 map_cell0
+  environment: '{{ keystone_admin_env }}'
+  become: true
+  command: nova-manage cell_v2 map_cell0
+
+
+#
+## restart service
+#
+- name: Nova SERVER - waiting for service restart
+  become: true
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+   
+    - nova-api
+    - nova-api-metadata
+    - nova-scheduler
+    - nova-conductor
+    #- nova-novncproxy
+    - nova-serialproxy
+    - nova-spicehtml5proxy

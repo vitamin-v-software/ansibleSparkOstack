@@ -1,0 +1,40 @@
+
+- name: DB - setting /root/.my.cnf
+  become: true
+  copy:
+    dest: /root/.my.cnf
+    content: |
+      [client]
+      user=root
+      password="{{ DB_root_password }}"
+      socket  = /var/run/mysqld/mysqld.sock
+
+- name: DB - Configure MariaDB
+  become: true
+  template:
+    src: openstack.cnf
+    dest: /etc/mysql/mariadb.conf.d/openstack.cnf
+
+
+- name: DB - configure keystone access 1/3
+  become: true
+  template:
+    src: keystone.sql.j2
+    dest: /root/keystone.sql
+
+- name: DB - grant access to Keystone 2/3
+  become: true
+  shell: mysql -u root < /root/keystone.sql
+
+- name: DB - grant access to keystone 3/3
+  file:
+    path: /root/keystone.sql
+    state: absent
+
+- name: DB - Wait for MariaDB Service
+  service:
+    name: mysql
+    state: restarted
+    enabled: yes
+
+

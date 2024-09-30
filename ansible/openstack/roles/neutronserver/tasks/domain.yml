@@ -1,0 +1,18 @@
+
+- name: openstack - Checking if user role "{{ NEUTRON_DB_USER }}" exists
+  environment: '{{ keystone_admin_env }}'
+  command: "/usr/bin/openstack user show {{ NEUTRON_DB_USER }}"
+  ignore_errors: True
+  register: neutron_cmd_run
+
+- name: openstack - Creating user  "{{ NEUTRON_DB_USER }}"
+  environment: '{{ keystone_admin_env }}'
+  command: "openstack user create --domain {{ OS_PROJECT_DOMAIN }} {{ NEUTRON_DB_USER }} --password {{ GLANCE_DB_PASSWORD }}"
+  when: neutron_cmd_run is failed
+
+- name: openstack - Adding user "{{ NEUTRON_DB_USER }}" to admin role
+  environment: '{{ keystone_admin_env }}'
+  command: "openstack role add --project {{ OS_PROJECT_NAME }} --user {{ NEUTRON_DB_USER }} admin"
+
+
+

@@ -1,0 +1,64 @@
+
+username: sipeed
+timestamp: "{{ lookup('pipe', 'date +\"%Y-%m-%d %T\"') }}"
+
+storage_home_dir: "/mnt/data"
+storage_physical_dev: "/dev/sda1"
+tftp_root_dir: "{{ storage_home_dir }}/tftproot/"
+
+
+essential_packages:
+  - ansible
+  - autoconf
+  - build-essential
+  - cargo
+  - chrony
+  - cmake
+  - curl
+  - htop
+  - libbz2-dev
+  - libffi-dev
+  - libgdbm-dev
+  - libgpgme11-dev 
+  - libnss3-dev
+  - libreadline-dev
+  - libseccomp-dev
+  - libsqlite3-dev
+  - libssl-dev
+  - linux-perf
+  - ninja-build
+  - openjdk-11-jdk
+  - openssh-server
+  - pkg-config
+  - python3
+  - python3-dev
+  - rustc
+  - singularity-container
+  - squashfs-tools
+  - tmux
+  - uuid-dev
+  - vim
+  - wget
+  - zlib1g-dev
+
+
+dhcp_server_nic: end1
+
+packages_to_remove:
+  - alsa-utils
+  - blueman
+  - kicad
+  - xfce4
+  - xfdesktop4
+  - xfwm4 blueman
+  - lightdm
+  - lightdm-gtk-greeter
+  - libstaroffice-0.0-0
+  - libgspell-1-common
+  - libgtk-3-0
+  - libgtk-3-common
+  - libgtk-layer-shell0
+  - libgtk2.0-0
+  - libgtk2.0-common
+  - pulseaudio
+

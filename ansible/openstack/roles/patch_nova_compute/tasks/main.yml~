@@ -1,0 +1,4 @@
+- name: libvirt uploading riscv patch
+  ansible.builtin.copy:
+    src: files/0001-riscv-core_id.patch
+    dest: /tmp/libvirt/0001-riscv-core_id.patch

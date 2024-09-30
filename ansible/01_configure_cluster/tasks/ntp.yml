@@ -1,0 +1,27 @@
+
+- name: Installing ntp
+  apt:
+    name:
+      - ntpdate
+      - systemd-timesyncd
+    state: present
+
+
+
+#- name: Ensure NTP is running
+# service:
+# name: ntp
+#    state: started
+#    enabled: true
+
+- name: Enable Servers
+  ini_file:
+    path: /etc/systemd/timesyncd.conf
+    section: Time
+    option: Servers
+    value: 0.debian.pool.ntp.org 1.debian.pool.ntp.org 2.debian.pool.ntp.org 3.debian.pool.ntp.org
+
+- name: Enable ntp
+  command: timedatectl set-ntp true
+
+

@@ -1,0 +1,60 @@
+- name: APT
+  apt:
+    name:
+      - libzstd-jni1
+      - libzstd-jni-java
+    state: present
+
+- name: File
+  become: true
+  shell: ln -s /usr/lib/riscv64-linux-gnu/libzstd-jni.so.1 /usr/lib/riscv64-linux-gnu/libzstd-jni-1.5.5-4.so
+
+
+- name: set yasieso
+  set_fact: spark_url=https://dlcdn.apache.org/spark/spark-3.5.1/spark-3.5.1-bin-hadoop3.tgz
+
+- name: set spark version
+  set_fact: spark_basedir=/opt/spark/
+
+#- name: set spark version
+#  set_fact: spark_workdir=/opt/spark/{{ (spark_url.split("/") | map('trim'))[4] }}
+#  set_fact: spark_basedir=/opt/spark/
+
+- name: set spark version
+  set_fact: spark_home=/opt/spark/{{ (spark_url | basename).split(".")[:-1] | join(".") }}
+
+
+
+- name: Downloading Spark
+  ansible.builtin.get_url:
+    url: "{{ spark_url }}"
+    dest: "/tmp/{{ spark_url | basename }}"
+    mode: '0777'
+
+- name: create install directory
+  file:
+    path: "{{ spark_basedir }}"
+    state: directory
+
+- name: Extracting Spark files
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ spark_url | basename }}"
+    dest: "{{ spark_basedir }}"
+    remote_src: yes
+    mode: '0777'
+
+
+- name: Ensuring permissions
+  ansible.builtin.file:
+    path: "{{ spark_home }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+    recurse: yes
+
+- name: set slaves
+  ansible.builtin.template:
+    src: slaves.j2
+    dest: "{{ spark_home }}/conf/slaves"
+    mode: '0755'
+

@@ -1,0 +1,20 @@
+
+- name: Nova Server - Configuring DB, rendering SQL template (1/3)
+  template:
+    src: mysql.sql
+    dest: /tmp/nova_db.sql
+
+- name: Nova Server - Configuring DB, running SQL commands (2/3)
+  become: true
+  shell: mysql -u root < /tmp/nova_db.sql
+
+- name: Nova Server - Configuring DB, removing SQL template  (3/3)
+  ansible.builtin.file:
+    path: /tmp/nova_db.sql
+    state: absent
+
+#templates/mysql.sql
+
+
+
+

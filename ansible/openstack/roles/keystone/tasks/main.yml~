@@ -1,0 +1,33 @@
+#
+### INSTALL PACKAGES
+#
+- name: DB - Installing MariaDB
+  apt:
+    pkg:
+      - mariadb-server
+      - python3-mysqldb
+      - python3-openstackclient
+      - python3-heatclient
+      - keystone
+      - apache2
+      - libapache2-mod-wsgi-py3
+
+
+#
+### INSTALL & CONFIG DATABASE
+#
+- include_tasks: db.yml
+
+#
+### KEYSTONE 
+#
+- include_tasks: keystone.yml
+
+
+#
+### APACHE
+#
+#- include_tasks: keystone.yml
+
+
+

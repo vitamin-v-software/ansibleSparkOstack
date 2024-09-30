@@ -1,0 +1,11 @@
+all:
+  children:
+    controller_nodes:
+      hosts:
+        controller01:
+          ansible_host: 192.168.10.18
+          ansible_ssh_user: sipeed
+          external_ip: 192.168.98.101
+          internal_ip: 192.168.99.101
+
+

@@ -1,0 +1,67 @@
+
+#- name: Configure DHCP - preppend DNS revolv to controller01
+#  lineinfile:
+#    regexp: '^#?(prepend domain-name-servers) (.*);$'
+#    backrefs: true
+#    line: '\1 {{ ansible_host_private }};'
+#    dest: /etc/dhcp/dhclient.conf
+#    state: present
+
+
+
+- name: Starting NetworkManager
+  service:
+    name: NetworkManager
+    state: started
+    enabled: true
+
+
+- name: NAT - Enabling net.ipv4.ip_forward
+  ansible.posix.sysctl:
+    name: net.ipv4.ip_forward
+    value: '1'
+    sysctl_set: true
+    state: present
+    reload: true
+
+- name: NAT - Adding rules to IP tables
+  become: true
+  command: "{{item}}"
+  with_items:
+    - iptables -A FORWARD -i end1 -o end0 -j ACCEPT
+    - iptables -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+    - iptables -t nat -A POSTROUTING -s 10.0.0.0/16 -o end0 -j MASQUERADE
+
+- name: NAT - Saving iptables rules
+  become: true
+  shell: /sbin/iptables-save > /etc/iptables.up.rules
+
+- name: NAT - Load rules on Boot
+  copy:
+    dest: /etc/network/if-pre-up.d/iptables
+    content: |
+      #!/bin/sh
+      /sbin/iptables-restore < /etc/iptables.up.rules
+    mode: 754
+
+
+
+- name: Install DHCP Server
+  apt:
+    name:
+      - isc-dhcp-server
+    state: present
+
+- name: Enabling DHCP for compute nodes
+  become: true
+  copy:
+    dest: /etc/dhcp/dhcpd.conf
+    src: "files/{{ dhcp_file }}"
+    
+- name: Starting DHCP server
+  service:
+    name: isc-dhcp-server
+    state: started
+    enabled: true
+
+

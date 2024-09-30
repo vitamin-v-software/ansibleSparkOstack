@@ -1,0 +1,232 @@
+##
+### Install Guide : https://docs.openstack.org/neutron/2023.2/install/compute-install-ubuntu.html
+### Verify install: 
+##
+
+#
+### INSTALL PACKAGES
+#
+- name: Installing Package(s)
+  apt:
+    pkg:
+      - neutron-openvswitch-agent
+      - neutron-dhcp-agent
+      - neutron-metadata-agent
+      - openvswitch-switch
+
+
+
+#
+## NEUTRON - 
+#
+#- include_tasks: neutron_compute.yml
+
+
+#- name: Configure neutron compute
+#  template:
+#    src: neutron_serv.conf
+#    dest: /etc/neutron/neutron.conf
+
+
+
+#
+### NOVA CONFIG NEUTRON
+#
+# I'm not using a temple here so we make sure not to override other section configs
+- name: Configure neutron default section
+  become: true
+  ini_file:
+    path: /etc/neutron/neutron.conf
+    section: DEFAULT
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  loop:
+    - { option: "transport_url", value: 'rabbit://{{RABBIT_USER}}:{{RABBIT_PASSWORD}}@{{ hostvars[groups["controller_nodes"][0]]["internal_ip"] }}:5672/' }
+    - { option: "service_plugins", value: "" }
+    - { option: "notify_nova_on_port_status_changes", value: "true" }
+    - { option: "notify_nova_on_port_data_changes", value: "true" }
+    - { option: "interface_driver", value: "openvswitch" }
+    - { option: "dhcp_agents_per_network", value: "1" }
+    
+
+#
+### NOVA CONFIG NEUTRON
+#
+# I'm not using a temple here so we make sure not to override other section configs
+- name: Configure NOVA neutron section
+  ini_file:
+    path: /etc/nova/nova.conf
+    section: neutron
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  loop:
+    - { option: "auth_url", value: 'http://{{ hostvars[groups["controller_nodes"][0]]["internal_ip"] }}:5000' }
+    - { option: "auth_type", value: password }
+    - { option: "project_domain_name", value: "{{ OS_PROJECT_DOMAIN }}" }
+    - { option: "user_domain_name", value: "{{ OS_USER_DOMAIN }}" }
+    - { option: "region_name", value: "{{ OS_REGION_NAME }}" }
+    - { option: "project_name", value: "{{ OS_PROJECT_NAME }}" }
+    - { option: "username", value: "{{ NEUTRON_DB_USER }}" }
+    - { option: "password", value: "{{ NEUTRON_DB_PASSWORD }}" }
+    - { option: "service_metadata_proxy", value: "true" }
+    - { option: "metadata_proxy_shared_secret", value: "{{ METADATA_SECRET }}" }
+
+
+#
+### ML2 PLUGIN
+#
+# I'm not using a temple here so we make sure not to override other section configs
+- name: Configure ML2 Plugin - ml2
+  ini_file:
+    path: /etc/neutron/plugins/ml2/ml2_conf.ini
+    section: ml2
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  loop:
+    - { option: "type_drivers", value: 'flat,vlan'  }
+    - { option: "tenant_network_types", value: '' }
+    - { option: "mechanism_drivers", value: 'openvswitch' }
+    - { option: "extension_drivers", value: 'port_security' }
+
+- name: Configure ML2 Plugin - ml2_type_flat
+  ini_file:
+    path: /etc/neutron/plugins/ml2/ml2_conf.ini
+    section: ml2_type_flat
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  loop:
+    - { option: "flat_networks", value: "provider"  }
+
+- name: Configure ML2 Plugin - ml2_type_vlan
+  ini_file:
+    path: /etc/neutron/plugins/ml2/ml2_conf.ini
+    section: ml2_type_vlan
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  loop:
+    - { option: "network_vlan_ranges", value: "provider"  }
+
+
+- name: Configure ML2 Plugin - securitygroup
+  ini_file:
+    path: /etc/neutron/plugins/ml2/ml2_conf.ini
+    section: securitygroup
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  loop:
+    - { option: "enable_security_group", value: "true" }
+    - { option: "enable_ipset", value: "true" }
+#    - { option: "firewall_driver", value: "iptables_hybrid" }
+    - { option: "firewall_driver", value: "openvswitch" }
+
+
+
+
+- name: Checking if bridge Exists
+  environment: '{{ keystone_admin_env }}'
+  become: true
+  shell: ovs-vsctl br-exists {{ PROVIDER_BRIDGE_NAME }}
+  register: neutron_br_existis
+  ignore_errors: true
+ 
+- name: Creating bridge Interface
+  environment: '{{ keystone_admin_env }}'
+  become: true
+  shell: ovs-vsctl add-br {{ PROVIDER_BRIDGE_NAME }}
+  when: neutron_br_existis is failed
+
+- name: Checking if bridge Exists
+  environment: '{{ keystone_admin_env }}'
+  become: true
+  shell: ovs-vsctl port-to-br end1
+  register: neutron_port_existis
+  ignore_errors: true
+
+- name: Creating bridge Interface
+  environment: '{{ keystone_admin_env }}'
+  become: true
+  shell: ovs-vsctl add-port {{ PROVIDER_BRIDGE_NAME }} end1
+  when: neutron_port_existis is failed
+
+
+
+##
+### OPENVSWITCH 
+##
+
+- name: Configure NOVA neutron section
+  ini_file:
+    path: /etc/neutron/plugins/ml2/openvswitch_agent.ini
+    section: agent
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  loop:
+    - { option: "tunnel_types", value: '' }
+    - { option: "l2_population", value: 'true' }
+
+# configure openvswitch compute side
+- name: Configure NOVA neutron section
+  ini_file:
+    path: /etc/neutron/plugins/ml2/openvswitch_agent.ini
+    section: ovs
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  loop:
+    - { option: "bridge_mappings", value: 'provider:br-provider' }
+    - { option: "local_ip", value: "{{ external_ip }}" }
+
+
+- name: Configure NOVA neutron section
+  ini_file:
+    path: /etc/neutron/plugins/ml2/openvswitch_agent.ini
+    section: securitygroup
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+  loop:
+    - { option: "enable_ipset", value: 'false' }
+    - { option: "enable_security_group", value: 'true' }
+    - { option: "firewall_driver", value: 'openvswitch' }
+#    - { option: "firewall_driver", value: 'iptables_hybrid' }
+
+
+
+- name: Modprobe br_netfilter
+  become: true
+  modprobe:
+    name: br_netfilter
+    state: present
+
+- name: set net.bridge.bridge-nf-call-iptables
+  become: true
+  sysctl:
+    name: net.bridge.bridge-nf-call-iptables
+    value: '1'
+    reload: yes
+
+- name: set net.bridge.bridge-nf-call-ip6tables
+  become: true
+  sysctl:
+    name: net.bridge.bridge-nf-call-ip6tables
+    value: '1'
+    reload: yes
+
+
+- name: Adding to sudoers
+  become: true
+  shell: 'echo "neutron ALL = (root) NOPASSWD: /usr/bin/nova-rootwrap /etc/nova/rootwrap.conf *" >> /etc/sudoers'
+
+
+#
+## restart service
+#
+- name: Waiting for service restart
+  become: true
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - nova-compute
+    - neutron-openvswitch-agent
+
+
+

@@ -1,0 +1,39 @@
+all:
+  children:
+    controller_nodes:
+      hosts:
+        controller01:
+          ansible_host: 192.168.10.18
+          ansible_ssh_user: sipeed
+          external_ip: 192.168.10.18
+          internal_ip: 10.0.0.1
+
+
+    compute_nodes:
+      hosts:
+#        ln01:
+#          ansible_host: 10.0.0.10
+#          ansible_ssh_user: sipeed
+#          external_ip: 10.0.0.10
+#          internal_ip: 10.0.1.2
+        ln02:
+          ansible_host: 10.0.0.12
+          ansible_ssh_user: sipeed
+          external_ip: 10.0.0.12
+          internal_ip: 10.0.1.3
+#        ln03:
+#          ansible_host: 10.0.0.14
+#          ansible_ssh_user: sipeed
+#          external_ip: 10.0.0.14
+#          internal_ip: 10.0.1.5
+
+      vars:
+        ansible_ssh_common_args: '-o ProxyCommand="ssh -p 22 -W %h:%p -q sipeed@licheenostrum.int.bsc.es"'
+
+
+#ln01.licheenostrum.local ansible_host=10.0.0.10
+#ln02.licheenostrum.local ansible_host=10.0.0.12
+#ln03.licheenostrum.local ansible_host=10.0.0.14
+#ln04.licheenostrum.local ansible_host=10.0.0.16
+#st01.licheenostrum.local
+

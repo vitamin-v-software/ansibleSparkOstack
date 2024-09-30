@@ -1,0 +1,58 @@
+
+- name: openstack - Checking if user role "{{ NOVA_DB_USER }}" exists
+  environment: '{{ keystone_admin_env }}'
+  command: "/usr/bin/openstack user show {{ NOVA_DB_USER }}"
+  ignore_errors: True
+  register: novaserver_cmd_run
+
+- name: openstack - Creating user  "{{ NOVA_DB_USER }}"
+  environment: '{{ keystone_admin_env }}'
+  command: "openstack user create --domain {{ OS_PROJECT_DOMAIN }} {{ NOVA_DB_USER }} --password {{ NOVA_DB_PASSWORD }}"
+  when: novaserver_cmd_run is failed
+
+
+
+- name: openstack - Adding user "{{ NOVA_DB_USER}}" to admin role
+  environment: '{{ keystone_admin_env }}'
+  command: "openstack role add --project {{ OS_PROJECT_NAME }} --user {{ NOVA_DB_USER }} admin"
+
+
+#- name: openstack - Creating compute service
+#  environment: '{{ keystone_admin_env }}'
+#  command: openstack service create --name nova --description "OpenStack Compute" compute
+#
+#- name: openstack - Creating compute API service public endpoints 
+#  environment: '{{ keystone_admin_env }}'
+#  command: "openstack endpoint create --region {{ OS_REGION_NAME }}  compute public http://{{ hostvars[groups['controller_nodes'][0]]['internal_ip'] }}:8774/v2.1"
+#
+#- name: openstack - Creating compute API service internal endpoints 
+#  environment: '{{ keystone_admin_env }}'
+#  command: "openstack endpoint create --region {{ OS_REGION_NAME }}  compute internal http://{{ hostvars[groups['controller_nodes'][0]]['internal_ip'] }}:8774/v2.1"
+#
+#- name: openstack - Creating compute API service admin endpoints 
+#  environment: '{{ keystone_admin_env }}'
+#  command: "openstack endpoint create --region {{ OS_REGION_NAME }} compute admin http://{{ hostvars[groups['controller_nodes'][0]]['internal_ip'] }}:8774/v2.1"
+
+
+- name: Nova SERVER - running nova-manage api_db syn
+  environment: '{{ keystone_admin_env }}'
+  become: true
+  command: nova-manage api_db sync
+
+- name: Nova SERVER - running nova-manage cell_v2 map_cell0
+  environment: '{{ keystone_admin_env }}'
+  become: true
+  command: nova-manage cell_v2 map_cell0
+
+- name: Nova SERVER - running nova-manage cell_v2 create_cell
+  environment: '{{ keystone_admin_env }}'
+  become: true
+  command: nova-manage cell_v2 create_cell --name=cell1 --verbose
+
+- name: Nova SERVER - running nova-manage db sync
+  environment: '{{ keystone_admin_env }}'
+  become: true
+  command: nova-manage db sync
+
+
+

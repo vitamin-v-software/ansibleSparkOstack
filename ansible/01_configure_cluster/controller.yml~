@@ -1,0 +1,29 @@
+---
+#- hosts: controller
+#  become: yes
+#  tasks:
+#    - import_tasks: tasks/desipeefy_repos.yml
+#    - import_tasks: tasks/ntp.yml
+#    - import_tasks: tasks/ssh_connection.yml
+#    - import_tasks: tasks/host_config.yml
+#    - import_tasks: tasks/controller.yml
+
+
+#- hosts: compute
+#  become: yes
+#  tasks:
+#    - import_tasks: tasks/desipeefy_repos.yml
+#    - import_tasks: tasks/ntp.yml
+#    - import_tasks: tasks/ssh_connection.yml
+#    - import_tasks: tasks/host_config.yml
+
+
+- hosts: storage
+  become: yes
+  tasks:
+#    - import_tasks: tasks/desipeefy_repos.yml
+#    - import_tasks: tasks/ntp.yml
+#    - import_tasks: tasks/ssh_connection.yml
+#    - import_tasks: tasks/host_config.yml
+    - import_tasks: tasks/setup_storage.yml
+    - import_tasks: tasks/tftp.yml

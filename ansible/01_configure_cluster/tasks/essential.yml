@@ -1,0 +1,27 @@
+
+- name: Add debian repositories
+  lineinfile:
+    dest: /etc/apt/sources.list
+    line: "deb http://deb.debian.org/debian sid main contrib"
+    insertafter: EOF
+
+- name: Set time and date
+  command: "sudo date -s '{{timestamp}}'"
+
+- name: Update packages
+  apt:
+    update_cache: yes
+#    upgrade: yes
+
+- name: fix deb
+  command: "{{item}}"
+  with_items:
+    - sudo apt --fix-broken install
+    - sudo dpkg --configure -a
+    - sudo systemctl disable lightdm
+
+- name: Install essential packages
+  package:
+    name: "{{essential_packages}}"
+    state: fixed
+
