@@ -10,23 +10,11 @@
     owner: root
     mode: 0644
 
-- name: Populating /etc/hosts with compute node info
+- name: Populating /etc/hosts
   lineinfile:
     dest: /etc/hosts
     regexp: '.*{{ item }}$'
-    line: "{{ hostvars[item].ansible_host }} {{ hostvars[item].ansible_host_name }} {{item}}"
+    line: "{{ hostvars[item].ansible_host_private if item in groups['controller'] else hostvars[item].ansible_host }} {{ hostvars[item].ansible_host_name }} {{ item }}"
     state: present
-  when: hostvars[item].ansible_host is defined
-  with_items: "{{ groups.compute }}"
-
-
-- name: Populating /etc/hosts with controller node info
-  lineinfile:
-    dest: /etc/hosts
-    regexp: '.*{{ item }}$'
-    line: "{{ hostvars[item].ansible_host_private }} {{ hostvars[item].ansible_host_name }} {{ hostvars[item].ansible_host_full_name}}"
-    state: present
-  when: hostvars[item].ansible_host_private is defined
-  with_items: "{{ groups.controller }}"
-
-
+  loop: "{{ groups['all'] }}"
+  tags: host_config
