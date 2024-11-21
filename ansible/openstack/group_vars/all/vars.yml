@@ -1,9 +1,9 @@
 #DB_root_password: 
 
-DB_root_password: 
+DB_root_password: licheepi
 KEYSTONE_PASSWORD: licheepi
 
-PROVIDER_BRIDGE_NAME: br-provider
+PROVIDER_BRIDGE_NAME: br-ex
 
 RABBIT_USER: openstack
 RABBIT_PASSWORD: licheepi
@@ -47,6 +47,7 @@ OS_IDENTITY_API_VERSION: 3
 OS_IMAGE_API_VERSION: 2
 
 
+# OS_PROJECT_NAME is set to admin (OS_USERNAME_ADMIN) due to first bootstrap
 keystone_admin_env:
   OS_PROJECT_DOMAIN_NAME: "{{ OS_PROJECT_DOMAIN }}"
   OS_USER_DOMAIN_NAME: "{{ OS_USER_DOMAIN }}"
