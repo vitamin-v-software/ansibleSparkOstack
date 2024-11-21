@@ -8,7 +8,7 @@
   command: "/usr/bin/openstack project show {{ OS_PROJECT_NAME }}"
   ignore_errors: True
   register: keystone_cmd_run
- 
+
 - name: Keystone - Creating project "{{ OS_PROJECT_NAME }}"
   environment: "{{ keystone_admin_env }}"
   command: "/usr/bin/openstack project create --domain {{ OS_PROJECT_DOMAIN }} --description '{{ OS_PROJECT_DESC }}' {{ OS_PROJECT_NAME }}"

@@ -1,15 +1,15 @@
 ---
 
-#- hosts: controller_nodes
-#  become: true
-#  roles:
-#    - role: keystone
-#    - role: rabbitmq
-#    - role: glance
-#    - role: placement-api
-#    - role: novaserver
-#    - role: neutronserver
-#    - role: horizon
+- hosts: controller_nodes
+  become: true
+  roles:
+    - role: keystone
+    - role: rabbitmq
+    - role: glance
+    - role: placement-api
+    - role: novaserver
+    - role: neutronserver
+    - role: horizon
 
 
 
@@ -17,15 +17,9 @@
   become: true
   roles:
     - role: novacompute
-      #tags: libvirt_nova
-      tags: nova_compute
     - role: patch_nova_compute
-      tags: patch_nova_compute
     - role: libvirt_riscv
-      tags: remove_libvirt
-      tags: libvirt
     - role: qemu
-      tags: qemu
     - role: neutroncompute
     - role: neutron_dhcp
 

@@ -14,7 +14,7 @@
       - nova-conductor
       - nova-consoleproxy
       - nova-scheduler
-# From Doc but missing in debian:
+## From Doc but missing in debian:
 #      - nova-placement-api
 #      - nova-consoleauth
 
@@ -51,11 +51,10 @@
     name: "{{ item }}"
     state: restarted
   loop:
-   
     - nova-api
     - nova-api-metadata
     - nova-scheduler
     - nova-conductor
-    #- nova-novncproxy
+    - nova-novncproxy
     - nova-serialproxy
     - nova-spicehtml5proxy

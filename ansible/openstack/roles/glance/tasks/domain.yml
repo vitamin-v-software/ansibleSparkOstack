@@ -41,7 +41,7 @@
 #- name: openstack - Creating image API service admin endpoints 
 #  environment: '{{ keystone_admin_env }}'
 #  command: "openstack endpoint create --region {{ OS_REGION_NAME }}  image admin http://{{ hostvars[groups['controller_nodes'][0]]['internal_ip'] }}:9292"
-  
+
 
 
 #- name: openstack - Setting quota limit (1/4)

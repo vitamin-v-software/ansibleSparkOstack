@@ -42,7 +42,7 @@
   template:
     src: placement.conf
     dest: /etc/placement/placement.conf
-    
+
 - name: Placement API - running db sync
   environment: '{{ keystone_admin_env }}'
   become: true

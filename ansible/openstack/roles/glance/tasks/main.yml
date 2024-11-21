@@ -18,7 +18,7 @@
 - name: Configuring DB, running SQL commands (2/3)
   become: true
   shell: mysql -u root < /tmp/_glance.sql
-  
+
 - name: Configuring DB, removing SQL template  (3/3)
   ansible.builtin.file:
     path: /tmp/_glance.sql
