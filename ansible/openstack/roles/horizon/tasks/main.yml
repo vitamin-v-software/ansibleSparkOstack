@@ -9,11 +9,31 @@
 ##Already installed by keystone
 #     - libapache2-mod-wsgi-py3 
 
-- name: Horizon - Configuring local_settings.py
-  lineinfile:
+#
+## Configure dashboard (Horizon) local_settings.py 
+#
+
+## Changed by a template below (GUILLEM)
+
+#- name: Horizon - Configuring local_settings.py
+#  lineinfile:
+#    dest: /etc/openstack-dashboard/local_settings.py
+#    regexp: ALLOWED_HOSTS
+#    line: ALLOWED_HOSTS = [ '*' ]
+
+#- name: Horizon - Configuring local_settings.py
+#  lineinfile:
+#    dest: /etc/openstack-dashboard/local_settings.py
+#    regexp: OPENSTACK_KEYSTONE_URL
+#    line: OPENSTACK_KEYSTONE_URL = "http://%s:5000/v3" % OPENSTACK_HOST
+
+- name: Horizon - Configuring local_settings.py from template
+  template:
+    src: local_settings.py
     dest: /etc/openstack-dashboard/local_settings.py
-    regexp: ALLOWED_HOSTS
-    line: ALLOWED_HOSTS = [ '*' ]
+    owner: root
+    group: root
+    mode: '0644'
 
 
 ## Commented due to %NAME% error -> Apache2: bad user name %USER%
