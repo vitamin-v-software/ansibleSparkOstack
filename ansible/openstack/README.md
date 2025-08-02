@@ -34,8 +34,6 @@ The `licheenostrum_hosts.yml` file defines the cluster topology:
 - **ln02**: `10.0.0.12`
 - **ln03**: `10.0.0.14`
 
-All compute nodes use SSH proxy jump through `licheenostrum.int.bsc.es`.
-
 ## OpenStack Services Deployed
 
 ### Controller Node Services
