@@ -1,8 +1,0 @@
-
-- name: Install Server 
-  become: true
-  apt:
-    update_cache: yes
-    pkg:
-      - nfs-kernel-server
-

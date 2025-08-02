@@ -1,4 +1,0 @@
-[defaults]
-inventory = openstack.yml
-host_key_checking = False
-

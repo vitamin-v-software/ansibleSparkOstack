@@ -1,6 +1,0 @@
----
-- hosts: controller_nodes
-  become: true
-  roles:
-    - role: mariadb
-
