@@ -2,7 +2,7 @@
 
 This repository contains the complete infrastructure setup for deploying OpenStack cloud platform and Apache Spark distributed computing on a RISC-V cluster environment as well as custom benchmarks to stress and test cache and memory systems. 
 
-It has been developed as a proof of concept during WP3 of the project VITAMIN-V and aims to provide a starting point for using cloud computing and distributed computing on RISC-V hardware.
+It has been developed as a proof of concept during WP3 and WP4 of the project VITAMIN-V and aims to provide a starting point for using cloud computing and distributed computing on RISC-V hardware.
 
 ## Project Structure
 
